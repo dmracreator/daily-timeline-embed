@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily timeline</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #777; background: transparent; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 760px; padding: 16px; }
+    h1 { margin: 0 0 34px; color: #f5f5f5; font-size: clamp(30px, 5vw, 44px); letter-spacing: -.055em; line-height: 1; }
+    ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 32px; }
+    li { font-size: clamp(20px, 3.2vw, 29px); font-weight: 450; letter-spacing: -.035em; line-height: 1.4; transition: color .25s ease; }
+    li.current { color: #f5f5f5; }
+    strong { font-weight: 750; }
+    @media (max-width: 420px) { main { padding: 12px; } ol { gap: 24px; } }
+  </style>
+  <main>
+    <h1>daily timeline.</h1>
+    <ol id="timeline"></ol>
+  </main>
+  <script>
+    const items = [
+      ['09:00', 'plan.', 'Review priorities, choose three outcomes, and begin the hardest task.'],
+      ['09:15', 'deep work.', 'Focus on the highest-impact task without messages or multitasking.'],
+      ['10:30', 'break.', 'Step away, stretch, drink water, and rest your eyes.'],
+      ['10:45', 'deep work.', 'Continue the priority task or move to the next defined outcome.'],
+      ['12:00', 'admin.', 'Check messages, handle quick requests, and update task statuses.'],
+      ['12:30', 'lunch.', 'Take a full screen-free break and move your body.'],
+      ['13:30', 'focused work.', 'Complete the second major outcome of the day.'],
+      ['14:45', 'break.', 'Walk, refill water, and reset.'],
+      ['15:00', 'collaboration.', 'Hold meetings, reply to messages, and complete lighter tasks.'],
+      ['16:00', 'final focus.', 'Finish the third outcome and close open loops.'],
+      ['16:45', 'shutdown.', 'Record progress, clear your workspace, and choose tomorrow’s first task.'],
+      ['17:00', 'finish.', 'Log off and leave work behind.']
+    ];
+    const minutes = time => { const [hours, mins] = time.split(':').map(Number); return hours * 60 + mins; };
+    const amsterdamMinutes = date => {
+      const values = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Amsterdam', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(date);
+      return Number(values.find(x => x.type === 'hour').value) * 60 + Number(values.find(x => x.type === 'minute').value);
+    };
+    const list = document.querySelector('#timeline');
+    list.innerHTML = items.map(([time, label, text]) => `<li data-start="${minutes(time)}"><strong>${time} — ${label}</strong> ${text}</li>`).join('');
+    const update = () => {
+      const now = amsterdamMinutes(new Date());
+      const current = [...list.children].reduce((active, item, index) => Number(item.dataset.start) <= now ? index : active, -1);
+      [...list.children].forEach((item, index) => item.classList.toggle('current', index === current));
+    };
+    update();
+    setInterval(update, 1000);
+  </script>
+</html>
